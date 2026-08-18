@@ -131,7 +131,7 @@ contains
                    globalcells,                                  &
                    ids,ide, jds,jde, kds,kde,                    &
                    ims,ime, jms,jme, kms,kme,                    &
-                   its,ite, jts,jte, kts,kte                     )
+                   its,ite, jts,jte, kts,kte, hfx_bb             ) ! SRB: Adding heat feedback from fires
 !-----------------------------------------------------------------
    implicit none
 !-----------------------------------------------------------------
@@ -300,6 +300,8 @@ contains
 
    real,       dimension( ims:ime , 1:nsl, jms:jme )           , &
                intent(inout)    ::                 soilmois,sh2o,tso
+
+   real, dimension( ims:ime, jms:jme ), intent(in) :: hfx_bb
 
    real,       dimension( ims:ime, jms:jme )                   , &
                intent(inout)    ::                        soilt, &
@@ -1000,7 +1002,7 @@ contains
                   lh(i,j),hfx(i,j),sflx(i,j),sublim(i,j),          &
                   evapl(i,j),prcpl(i,j),budget(i,j),runoff1(i,j),  &
                   runoff2(i,j),soilice,soiliqw,infiltrp,smf(i,j),  &
-                  globalcells(i))
+                  globalcells(i),hfx_bb(i,j))
 
                field_sf_loc(i,:,j) = field_sf_temp
 !-----------------------------------------------------------------
@@ -1290,7 +1292,7 @@ contains
                 smelt,snoh,snflx,snom,snowfallac,acsnow,         &
                 edir1,ec1,ett1,eeta,qfx,hfx,s,sublim,            &
                 evapl,prcpl,fltot,runoff1,runoff2,soilice,       &
-                soiliqw,infiltr,smf,globalcellid)
+                soiliqw,infiltr,smf,globalcellid,hfx_bb)
 !-----------------------------------------------------------------
    implicit none
 !-----------------------------------------------------------------
@@ -1433,6 +1435,8 @@ contains
                                                        soiliqws, &
                                                        soilices, &
                                                         keepfrs
+real, intent(in)    ::  hfx_bb !SRB  
+
 !-------- 1-d variables
    real :: &
                                                             dews, &
@@ -1798,7 +1802,7 @@ contains
          t3      = stbolt*soilt*soilt*soilt
          upflux  = t3 *soilt
          xinet   = emiss_snowfree*(glw-upflux)
-         rnet    = gswnew + xinet
+         rnet    = gswnew + xinet + hfx_bb ! SRB: Adding fire heat flux
          !if ( wrf_at_debug_level(lsmruc_dbg_lvl) ) then
          if (globalcellid==targetcell) then
             print *,'globalcellid =',globalcellid
@@ -1854,7 +1858,7 @@ contains
       t3      = stbolt*soilt*soilt*soilt
       upflux  = t3 *soilt
       xinet   = emiss*(glw-upflux)
-      rnet    = gswnew + xinet
+      rnet    = gswnew + xinet + hfx_bb ! SRB: Adding fire heat flux
       !if ( wrf_at_debug_level(lsmruc_dbg_lvl) ) then
       if (globalcellid==targetcell) then
          print *,'globalcellid =',globalcellid
@@ -2006,7 +2010,7 @@ contains
       t3      = stbolt*soilt*soilt*soilt
       upflux  = t3 *soilt
       xinet   = emiss*(glw-upflux)
-      rnet    = gswnew + xinet
+      rnet    = gswnew + xinet + hfx_bb !SRB: Adding fire heat flux
       !if ( wrf_at_debug_level(lsmruc_dbg_lvl) ) then
       if (globalcellid==targetcell) then
          print *,'globalcellid =',globalcellid
